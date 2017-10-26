@@ -1,9 +1,9 @@
 
-import { Component } from '@angular/core';
+import { Component, ViewContainerRef, ComponentFactoryResolver, EventEmitter } from '@angular/core';
 import { NavController } from 'ionic-angular';
 import { SQLite, SQLiteObject} from "@ionic-native/sqlite";
 import { MyPage } from '../my-page/my-page';
-import { TextaddPage } from '../textadd/textadd'
+import {TextaddPage} from '../textadd/textadd'
 
 /**
  * Generated class for the YourPage page.
@@ -20,37 +20,21 @@ export class YourPage {
     
     public DataArray: Array<Object>;
     myDate: String = new Date().toISOString();
-    constructor(public navCtrl: NavController, private sqlite:SQLite) {
-      
+  
+    constructor(public navCtrl: NavController, private sqlite:SQLite, private viewContainerRef:ViewContainerRef, private componentFactoryResolver:ComponentFactoryResolver) {
       //var today = new Date();
-     
       console.log("homepae :: constructor()");
-      sqlite.create({
-        name: 'data.db',
-        location: 'default'
-      })
-      .then((db:SQLiteObject) => {
-        db.executeSql('select * from usernameList1', {}).then((data) => {
-          
-          //alert(JSON.stringify(data)+"qq");
-          this.items=[];
-          if(data.rows.length > 0) {
-          for(var i = 0; i < data.rows.length; i++) {
-          this.items.push(
-            {
-              name: data.rows.item(i).name,
-             memo: data.rows.item(i).memo,
-             ctime: data.rows.item(i).createtime
-            }
-            
-          );
-          }
-          }
-        });
-      })
+      this.Reload();
     }
     add(){
-      this.navCtrl.push(TextaddPage);
+      let factoryResolver = this.componentFactoryResolver.resolveComponentFactory(TextaddPage);
+      let viewCntRef = this.viewContainerRef.createComponent(factoryResolver);
+      viewCntRef.instance.viewCntRef = viewCntRef;
+      viewCntRef.instance.testFun.subscribe( data => { //rxjs
+        this.Reloadtest();
+      });
+
+      //this.navCtrl.push("textaddPage");
     }
     
     username='';
@@ -66,14 +50,19 @@ export class YourPage {
       var nowDay = arrayDay[datec.getDay()];
       this.datec = nowYear + "년/" + nowMonth + "월/" + nowDate + "일/" + nowDay;
     }
+    Reloadtest(){
+      this.Reload();
+    }
     Reload(){
-      this.getDatetime();
       this.sqlite.create({
         name: 'data.db',
         location: 'default'
       })
       .then((db:SQLiteObject) => {
-        db.executeSql('select * from usernameList1', {}).then((data) => {
+        db.executeSql('CREATE TABLE IF NOT EXISTS notepad(idx INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT,memo TEXT, createtime TEXT)', {})
+        .then(() => console.log('Executed SQL'))
+        .catch(e => console.log(e));
+        db.executeSql('select * from notepad', {}).then((data) => {
           console.log(JSON.stringify(data)+"qq");
           this.items=[];
           if(data.rows.length > 0) {
@@ -92,7 +81,7 @@ export class YourPage {
           });
           })
           .catch(e => console.log(JSON.stringify(e)+"aa"));
-          console.log(this.username+"dd");
+         
           
           }
           

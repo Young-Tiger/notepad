@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
-import { NavController, NavParams } from 'ionic-angular';
-import { YourPage } from '../your/your';
+import { Component, Output, EventEmitter, ViewContainerRef } from '@angular/core';
+import { NavController, NavParams, IonicPage } from 'ionic-angular';
+
 import { SQLite, SQLiteObject } from '@ionic-native/sqlite'
 
 /**
@@ -17,12 +17,20 @@ import { SQLite, SQLiteObject } from '@ionic-native/sqlite'
 })
 export class TextaddPage {
 
+  viewCntRef:any;
+  
+  @Output() 
+  testFun:any = new EventEmitter<any>();
+
   constructor(public navCtrl: NavController, private sqlite:SQLite) {
   }
     username='';
     usermemo='';
     items=[];
     datec:String;
+
+  
+
     getDatetime(){
       var arrayDay = ["일요일","월요일","화요일","수요일","목요일","금요일","토요일"];
       var datec:any=new Date();
@@ -33,6 +41,7 @@ export class TextaddPage {
       this.datec = nowYear + "년/" + nowMonth + "월/" + nowDate + "일/" + nowDay;
     }
     save(){
+      this.viewCntRef.destroy();
       this.getDatetime();
       this.sqlite.create({
         name: 'data.db',
@@ -40,15 +49,16 @@ export class TextaddPage {
       })
       .then((db:SQLiteObject) => {
         
-        db.executeSql('CREATE TABLE IF NOT EXISTS usernameList1(idx INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT,memo TEXT, createtime TEXT)', {})
+        db.executeSql('CREATE TABLE IF NOT EXISTS notepad(idx INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT,memo TEXT, createtime TEXT)', {})
         .then(() => console.log('Executed SQL'))
         .catch(e => console.log(e));
-        db.executeSql('INSERT INTO usernameList1(name,memo,createtime) VALUES(?,?,?)', [this.username,this.usermemo,this.datec])
+        db.executeSql('INSERT INTO notepad(name,memo,createtime) VALUES(?,?,?)', [this.username,this.usermemo,this.datec])
         .then(() => console.log('Executed SQL삽입'))
         .catch(e => console.log(e));
-        db.executeSql('select * from usernameList1', {}).then((data) => {
+        db.executeSql('select * from notepad', {}).then((data) => {
           console.log(JSON.stringify(data)+"qq");
           this.items=[];
+          
           if(data.rows.length > 0) {
           for(var i = 0; i < data.rows.length; i++) {
           this.items.push(
@@ -59,18 +69,23 @@ export class TextaddPage {
             }
           );
           }
-          }
+          } 
+          
+            this.testFun.next("hello world!");
+          
+          
+
         }, (err) => {
           console.log('Unable to execute sql: '+JSON.stringify(err));
           });
           })
           .catch(e => console.log(JSON.stringify(e)+"aa"));
-          console.log(this.username+"dd");
+       
           
           }
-          
+ 
   ionViewDidLoad() {
     console.log('ionViewDidLoad TextaddPage');
   }
-
+ 
 }

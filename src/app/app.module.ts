@@ -10,6 +10,7 @@ import { MyPage } from '../pages/my-page/my-page';
 import { YourPage } from '../pages/your/your';
 import { TextaddPage } from '../pages/textadd/textadd';
 import { SQLite } from '@ionic-native/sqlite'
+import {HelloworldPageModule} from '../pages/helloworld/helloworld.module';
 
 @NgModule({
   declarations: [
@@ -21,7 +22,8 @@ import { SQLite } from '@ionic-native/sqlite'
   ],
   imports: [
     BrowserModule,
-    IonicModule.forRoot(MyApp)
+    IonicModule.forRoot(MyApp),
+    HelloworldPageModule
   ],
   bootstrap: [IonicApp],
   entryComponents: [
